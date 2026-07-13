@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HAZELHOFF</title>
+  <meta name="description" content="Marnix Hazelhoff — building things at the intersection of technology, design, and ideas." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">HAZELHOFF</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="nav-cta" data-modal="contact">Get in touch</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="hero-eyebrow">Marnix Hazelhoff</span>
+    <h1 class="hero-name">HAZELHOFF</h1>
+    <p class="hero-tagline">
+      Building things at the intersection of technology, design, and ideas.
+      Based in the Netherlands.
+    </p>
+    <div class="hero-links">
+      <a href="#work" class="btn-primary">View my work</a>
+      <button class="btn-ghost" data-modal="contact">Get in touch &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="about-grid">
+      <div class="about-label">About</div>
+      <div class="about-content">
+        <p class="about-lead">
+          I'm Marnix — a curious builder with a passion for clean thinking
+          and well-crafted work.
+        </p>
+        <p>
+          I work at the crossroads of data, technology, and strategy.
+          Whether it's designing a system, writing a piece of analysis,
+          or building something from scratch — I care about getting the
+          details right.
+        </p>
+        <p>
+          When I'm not working, I'm probably reading, exploring ideas,
+          or learning something new.
+        </p>
+        <div class="about-tags">
+          <span>Strategy</span>
+          <span>Data</span>
+          <span>Technology</span>
+          <span>Design</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <!-- WORK -->
+  <section class="work" id="work">
+    <div class="work-header">
+      <span class="section-label">Selected Work</span>
+      <h2>Things I've built<br>and explored</h2>
+    </div>
+    <div class="work-grid">
+      <article class="work-card">
+        <div class="work-card-meta">
+          <span class="work-year">2026</span>
+          <span class="work-tag">Trading</span>
+        </div>
+        <h3>Momentum Trading Bot</h3>
+        <p>An automated S&amp;P 500 momentum strategy running on Alpaca — monthly
+        rebalancing into the strongest stocks, ATR-based risk management, and a
+        portfolio dashboard that updates itself daily.</p>
+        <a href="/tradingbot/" class="work-link">View live dashboard &rarr;</a>
+      </article>
+      <article class="work-card">
+        <div class="work-card-meta">
+          <span class="work-year">2026</span>
+          <span class="work-tag">Web</span>
+        </div>
+        <h3>Personal Website</h3>
+        <p>Designed and built this site from scratch — iterating with Claude using a screenshot-and-refine loop.</p>
+        <a href="https://github.com/marnixhazelhoff-art/marnixhazelhoff-art.github.io" class="work-link" target="_blank" rel="noopener">View source &rarr;</a>
+      </article>
+      <article class="work-card work-card--cta">
+        <p>More projects on the way. Come back soon, or reach out directly.</p>
+        <button class="btn-primary" data-modal="contact">Get in touch</button>
+      </article>
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <!-- NOW -->
+  <section class="now">
+    <div class="now-grid">
+      <div class="about-label">Now</div>
+      <div class="now-content">
+        <p>What I'm currently focused on:</p>
+        <ul>
+          <li>Running and refining an automated momentum trading bot — Python, Alpaca, Claude Code</li>
+          <li>Learning to build with AI tools — Claude, APIs, agents</li>
+          <li>Deepening my knowledge of web design and frontend development</li>
+        </ul>
+        <span class="now-updated">Updated July 2026</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="contact-inner">
+      <span class="section-label">Contact</span>
+      <h2>Let's connect</h2>
+      <p>I'm open to interesting conversations, collaborations, and opportunities.</p>
+      <a href="mailto:marnix.hazelhoff@gmail.com" class="contact-email">
+        marnix.hazelhoff@gmail.com
+      </a>
+      <div class="contact-socials">
+        <a href="https://github.com/marnixhazelhoff-art" target="_blank" rel="noopener">GitHub &nearr;</a>
+        <a href="#">LinkedIn &nearr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">HAZELHOFF</span>
+    <span class="footer-copy">© 2026 Marnix Hazelhoff. All rights reserved.</span>
+  </footer>
+
+  <!-- CONTACT MODAL -->
+  <div class="modal-overlay" id="modal-overlay" aria-hidden="true"></div>
+  <div class="modal" id="contact-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+    <div class="modal-body" id="modal-body">
+      <p class="modal-eyebrow">Get in touch</p>
+      <h2 id="modal-title">Say hello</h2>
+      <p class="modal-sub">Leave your name and email and I'll get back to you.</p>
+      <form id="contact-form" novalidate>
+        <div class="form-group">
+          <label for="f-name">Name</label>
+          <input id="f-name" name="name" type="text" placeholder="Your name" required />
+        </div>
+        <div class="form-group">
+          <label for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="f-message">Message <span class="label-optional">(optional)</span></label>
+          <textarea id="f-message" name="message" rows="4" placeholder="What's on your mind?"></textarea>
+        </div>
+        <p class="form-error" id="form-error"></p>
+        <button type="submit" class="btn-submit" id="btn-submit">Send message</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ── MODAL LOGIC ────────────────────────────────────────────────
+    const overlay  = document.getElementById('modal-overlay');
+    const modal    = document.getElementById('contact-modal');
+    const closeBtn = document.getElementById('modal-close');
+
+    function openModal() {
+      modal.classList.add('is-open');
+      overlay.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => modal.querySelector('input').focus(), 100);
+    }
+
+    function closeModal() {
+      modal.classList.remove('is-open');
+      overlay.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('[data-modal="contact"]').forEach(el => {
+      el.addEventListener('click', e => { e.preventDefault(); openModal(); });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // ── FORM SUBMISSION via Formspree ──────────────────────────────
+    // SETUP (once):
+    //   1. Go to https://formspree.io and sign up (free)
+    //   2. Create a new form → enter marnix.hazelhoff@gmail.com
+    //   3. Verify your email
+    //   4. Copy the form ID (looks like "xabcdefg")
+    //   5. Replace YOUR_FORM_ID below with that ID
+    const FORMSPREE_URL = 'https://formspree.io/f/YOUR_FORM_ID';
+
+    const form    = document.getElementById('contact-form');
+    const errBox  = document.getElementById('form-error');
+    const submitBtn = document.getElementById('btn-submit');
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      errBox.textContent = '';
+
+      const name    = form.name.value.trim();
+      const email   = form.email.value.trim();
+      const message = form.message.value.trim();
+
+      if (!name)  { showError('Please enter your name.'); return; }
+      if (!email) { showError('Please enter your email.'); return; }
+
+      submitBtn.textContent = 'Sending…';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(FORMSPREE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ name, email, message })
+        });
+
+        if (res.ok) {
+          document.getElementById('modal-body').innerHTML = `
+            <div class="form-success">
+              <div class="success-icon">✓</div>
+              <h2>Message sent!</h2>
+              <p>Thanks ${name}. I'll get back to you at ${email} soon.</p>
+              <button class="btn-primary" onclick="closeModal()">Close</button>
+            </div>`;
+        } else {
+          const data = await res.json();
+          showError(data?.errors?.[0]?.message || 'Something went wrong. Please try again.');
+          submitBtn.textContent = 'Send message';
+          submitBtn.disabled = false;
+        }
+      } catch {
+        showError('Could not send. Check your connection and try again.');
+        submitBtn.textContent = 'Send message';
+        submitBtn.disabled = false;
+      }
+    });
+
+    function showError(msg) {
+      errBox.textContent = msg;
+    }
+  </script>
+
+</body>
+</html>

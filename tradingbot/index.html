@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio Dashboard — HAZELHOFF</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  :root {
+    --text-primary:   #0f0f0f;
+    --text-secondary: #555;
+    --text-tertiary:  #999;
+    --bg-page:        #fafafa;
+    --bg-card:        #fff;
+    --bg-tag:         #f0f0f0;
+    --border:         rgba(0, 0, 0, 0.09);
+    --border-strong:  rgba(0, 0, 0, 0.15);
+    --grid:           #ececec;
+    --series-1:       #0f0f0f;   /* portfolio */
+    --series-bm:      #999;      /* benchmark (de-emphasis) */
+    --up:             #16a34a;
+    --down:           #dc2626;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background: var(--bg-page); color: var(--text-primary);
+    font-size: 14px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* --- Nav (matches the personal site) --- */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 48px; height: 60px;
+    background: rgba(250, 250, 250, 0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-size: 15px; font-weight: 800; letter-spacing: 0.12em; }
+  .nav-back { font-size: 14px; font-weight: 500; color: var(--text-secondary); transition: color 0.15s; }
+  .nav-back:hover { color: var(--text-primary); }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 48px 64px; }
+
+  .page-eyebrow {
+    display: block; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-tertiary); margin-bottom: 10px;
+  }
+  h1 {
+    font-size: clamp(30px, 4vw, 42px); font-weight: 800;
+    letter-spacing: -0.025em; line-height: 1.1;
+  }
+  .page-meta { color: var(--text-tertiary); font-size: 13px; margin: 8px 0 36px; }
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--bg-tag); border-radius: 4px; padding: 2px 8px;
+    color: var(--text-secondary); vertical-align: 4px; margin-left: 12px;
+  }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .card-label {
+    display: block; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-tertiary); margin-bottom: 2px;
+  }
+  .sub { font-size: 13px; color: var(--text-tertiary); margin-bottom: 18px; }
+
+  /* --- Stat tiles --- */
+  .tiles { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .tile {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px 24px;
+  }
+  .tile .label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-tertiary);
+  }
+  .tile .value { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; margin-top: 4px; }
+  .tile.hero .value { font-size: 38px; font-weight: 800; letter-spacing: -0.02em; }
+  .tile .delta { font-size: 12px; font-weight: 500; margin-top: 2px; }
+  .delta.up   { color: var(--up); }
+  .delta.down { color: var(--down); }
+  @media (max-width: 860px) {
+    .tiles { grid-template-columns: 1fr 1fr; }
+    .tile.hero { grid-column: span 2; }
+    nav, .wrap { padding-left: 24px; padding-right: 24px; }
+  }
+
+  /* --- Chart --- */
+  .legend { display: flex; gap: 18px; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+  .legend .key { display: inline-block; width: 16px; height: 0; border-top: 2px solid; vertical-align: 3px; margin-right: 6px; }
+  .chartbox { position: relative; }
+  .chartbox svg { display: block; width: 100%; height: auto; }
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 8px 12px;
+    font-size: 12px; display: none; min-width: 150px; z-index: 5;
+  }
+  .tooltip .t-date { color: var(--text-tertiary); margin-bottom: 4px; }
+  .tooltip .t-row { display: flex; align-items: center; gap: 7px; margin-top: 2px; }
+  .tooltip .t-key { width: 12px; border-top: 2px solid; }
+  .tooltip .t-val { font-weight: 600; }
+  .tooltip .t-name { color: var(--text-secondary); }
+  details.tablev { margin-top: 10px; font-size: 12px; }
+  details.tablev summary { color: var(--text-tertiary); cursor: pointer; font-weight: 500; }
+  details.tablev .scroll { max-height: 240px; overflow-y: auto; margin-top: 8px; }
+
+  /* --- Allocation bars --- */
+  .alloc-row { display: grid; grid-template-columns: 56px 1fr 150px; align-items: center; gap: 12px; padding: 3px 0; }
+  .alloc-sym { font-size: 12px; font-weight: 600; }
+  .alloc-track { position: relative; height: 16px; }
+  .alloc-bar { height: 16px; border-radius: 0 4px 4px 0; background: var(--series-1); }
+  .alloc-bar.cash { background: #d4d4d4; }
+  .alloc-val { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* --- Tables --- */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: right; font-size: 11px; font-weight: 700; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.08em; padding: 6px 10px;
+    border-bottom: 1px solid var(--grid);
+  }
+  th:first-child, td:first-child { text-align: left; padding-left: 0; }
+  th:last-child, td:last-child { padding-right: 0; }
+  td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  td.sym { font-weight: 600; }
+  .pos { color: var(--up); }
+  .neg { color: var(--down); }
+  .side-buy  { color: var(--up); font-weight: 600; }
+  .side-sell { color: var(--down); font-weight: 600; }
+  .page-footer { color: var(--text-tertiary); font-size: 12px; margin-top: 28px; }
+  .overflow { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">HAZELHOFF</a>
+  <a class="nav-back" href="/">&larr; Back to site</a>
+</nav>
+
+<div class="wrap">
+  <span class="page-eyebrow">Momentum Trading Bot</span>
+  <h1>Portfolio Dashboard<span class="badge" id="badge"></span></h1>
+  <div class="page-meta">Generated <span id="generated"></span> · Automated S&amp;P 500 momentum strategy, monthly rebalance</div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="card">
+    <span class="card-label">Performance vs S&amp;P 500</span>
+    <div class="sub">Total return since inception (<span id="inception"></span>), indexed daily</div>
+    <div class="legend">
+      <span><span class="key" style="border-color:var(--series-1)"></span>Portfolio</span>
+      <span><span class="key" style="border-color:var(--series-bm)"></span>S&amp;P 500 (SPY)</span>
+    </div>
+    <div class="chartbox" id="chartbox">
+      <svg id="chart" viewBox="0 0 960 320" preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="Line chart of portfolio return versus S&P 500 since inception"></svg>
+      <div class="tooltip" id="tooltip"></div>
+    </div>
+    <details class="tablev">
+      <summary>View as table</summary>
+      <div class="scroll overflow"><table id="histtable"></table></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Allocation</span>
+    <div class="sub">Share of total portfolio value</div>
+    <div id="alloc"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Holdings</span>
+    <div class="sub" id="holdings-sub"></div>
+    <div class="overflow"><table id="holdings"></table></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Trade history</span>
+    <div class="sub" id="trades-sub"></div>
+    <div class="overflow"><table id="trades"></table></div>
+  </div>
+
+  <div class="page-footer">Data: Alpaca account API &amp; Yahoo Finance (SPY). Refreshed daily after US market close.
+  Automated momentum strategy on a paper account — not investment advice.</div>
+</div>
+
+<script>
+window.onerror = (msg, src, line, col) => {
+  const d = document.createElement("div");
+  d.style.cssText = "background:#fdecec;color:#8c1c1c;padding:8px 12px;font:12px monospace;margin-bottom:12px;border-radius:6px";
+  d.textContent = "Dashboard script error: " + msg + " (line " + line + ":" + col + ")";
+  document.body.prepend(d);
+};
+const DATA = {"generated": "13 Jul 2026, 20:28", "inception": "Mar 13, 2026", "account": {"equity": 169941.38, "cash": 73577.12, "invested": 96364.26, "positions": 8}, "returns": {"portfolio": 69.94, "spy": 13.63, "excess": 56.31}, "history": {"dates": ["2026-03-13", "2026-03-14", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-21", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-28", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-18", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-25", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-01", "2026-05-02", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-09", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-16", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-23", "2026-05-27", "2026-05-28", "2026-05-29", "2026-05-30", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-06", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-12", "2026-06-13", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-23", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-27", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-13"], "portfolio": [0.0, 0.0, -1.98, 1.47, -0.37, 1.04, -6.15, -3.88, 0.32, 1.27, -8.91, -8.08, -14.91, -6.66, 1.76, 2.76, 4.5, 7.48, 20.04, 23.31, 25.06, 28.27, 31.75, 29.13, 31.88, 32.52, 31.2, 32.63, 35.99, 36.67, 39.19, 39.01, 32.68, 33.34, 40.06, 42.06, 42.06, 52.15, 59.53, 55.21, 62.35, 71.4, 65.53, 68.79, 66.13, 58.52, 50.38, 49.32, 55.05, 62.16, 62.55, 74.94, 76.32, 75.85, 77.02, 80.81, 80.81, 92.01, 85.96, 65.71, 74.2, 70.89, 63.7, 79.29, 85.87, 102.09, 97.18, 100.97, 110.47, 118.07, 99.24, 97.78, 112.96, 95.01, 109.09, 111.64, 93.21, 75.18, 79.25, 68.26, 71.83, 79.46, 79.24, 69.94], "spy": [0.0, 0.0, 1.28, -0.13, -0.38, -1.8, -1.8, -1.11, -0.56, -2.33, -4.0, -4.0, -1.54, -0.79, -0.7, -0.7, -0.19, 2.35, 2.94, 2.87, 2.87, 5.14, 5.97, 6.23, 7.52, 7.52, 6.6, 7.68, 7.26, 8.09, 8.09, 7.75, 7.74, 8.81, 9.11, 9.11, 9.58, 11.1, 10.76, 11.68, 11.68, 11.76, 12.39, 13.28, 11.91, 11.91, 11.09, 12.23, 12.45, 12.89, 12.89, 13.62, 14.25, 14.53, 14.53, 15.0, 14.19, 14.63, 11.67, 11.67, 11.59, 9.83, 11.7, 12.3, 12.3, 13.6, 12.18, 13.35, 13.35, 11.35, 11.3, 11.46, 10.66, 10.66, 13.35, 13.2, 13.05, 13.05, 13.5, 13.15, 14.1, 14.6, 14.6, 13.63], "equity": [100000.0, 100000.0, 98023.47, 101469.39, 99632.99, 101036.57, 93847.29, 96124.99, 100318.43, 101273.43, 91086.67, 91920.55, 85093.23, 93342.73, 101762.37, 102760.29, 104504.33, 107477.39, 120038.39, 123306.83, 125056.35, 128267.98, 131745.0, 129131.74, 131879.76, 132520.64, 131195.72, 132632.7, 135986.34, 136669.08, 139193.4, 139006.28, 132678.48, 133343.92, 140056.0, 142056.96, 142056.96, 152147.14, 159528.62, 155211.22, 162349.62, 171399.66, 165534.36, 168788.94, 166128.62, 158520.12, 150382.26, 149320.4, 155053.9, 162155.32, 162545.56, 174942.44, 176323.72, 175846.1, 177015.72, 180808.6, 180808.6, 192008.78, 185964.1, 165710.78, 174200.24, 170886.18, 163701.14, 179293.86, 185873.1, 202090.26, 197179.12, 200972.72, 210469.24, 218066.84, 199236.42, 197782.74, 212963.6, 195006.5, 209090.7, 211638.42, 193209.96, 175183.86, 179247.0, 168258.44, 171826.18, 179457.24, 179238.62, 169941.38]}, "positions": [{"symbol": "MU", "qty": 19, "avg_entry": 450.461842, "price": 929.0, "value": 17651.0, "weight": 0.10386522693884208, "pnl": 9092.225002, "pnl_pct": 1.06233}, {"symbol": "STX", "qty": 20, "avg_entry": 405.92175, "price": 852.055, "value": 17041.1, "weight": 0.10027634234816733, "pnl": 8922.665, "pnl_pct": 1.09906}, {"symbol": "WDC", "qty": 26, "avg_entry": 288.423269, "price": 548.41, "value": 14258.66, "weight": 0.08390340245559968, "pnl": 6759.655006, "pnl_pct": 0.90141}, {"symbol": "LRCX", "qty": 42, "avg_entry": 219.533333, "price": 328.625, "value": 13802.25, "weight": 0.08121771166033841, "pnl": 4581.850014, "pnl_pct": 0.49693}, {"symbol": "WBD", "qty": 368, "avg_entry": 27.232514, "price": 27.2, "value": 10009.6, "weight": 0.05890031021285105, "pnl": -11.965152, "pnl_pct": -0.00119}, {"symbol": "GLW", "qty": 51, "avg_entry": 134.71902, "price": 182.52, "value": 9308.52, "weight": 0.054774887670089534, "pnl": 2437.84998, "pnl_pct": 0.35482}, {"symbol": "TER", "qty": 25, "avg_entry": 298.4494, "price": 340.805, "value": 8520.125, "weight": 0.05013567031172749, "pnl": 1058.89, "pnl_pct": 0.14192}, {"symbol": "ALB", "qty": 46, "avg_entry": 162.681522, "price": 125.5, "value": 5773.0, "weight": 0.0339705373700037, "pnl": -1710.350012, "pnl_pct": -0.22855}], "trades": [{"date": "2026-07-13", "side": "sell", "symbol": "WDC", "qty": 26, "price": 545.35, "value": 14179.1}, {"date": "2026-07-13", "side": "sell", "symbol": "WBD", "qty": 368, "price": 27.37, "value": 10072.16}, {"date": "2026-07-13", "side": "sell", "symbol": "TER", "qty": 25, "price": 340.77, "value": 8519.25}, {"date": "2026-07-13", "side": "sell", "symbol": "STX", "qty": 20, "price": 853.28, "value": 17065.6}, {"date": "2026-07-13", "side": "sell", "symbol": "MU", "qty": 19, "price": 925.88, "value": 17591.72}, {"date": "2026-07-13", "side": "sell", "symbol": "LRCX", "qty": 42, "price": 328.28, "value": 13787.76}, {"date": "2026-07-13", "side": "sell", "symbol": "GLW", "qty": 51, "price": 182.77, "value": 9321.27}, {"date": "2026-07-13", "side": "sell", "symbol": "ALB", "qty": 46, "price": 125.4, "value": 5768.4}, {"date": "2026-04-13", "side": "sell", "symbol": "NEM", "qty": 180, "price": 119.55, "value": 21519.22}, {"date": "2026-04-13", "side": "sell", "symbol": "INTC", "qty": 396, "price": 63.92, "value": 25310.99}, {"date": "2026-03-16", "side": "buy", "symbol": "NEM", "qty": 90, "price": 109.87, "value": 9888.21}, {"date": "2026-03-16", "side": "buy", "symbol": "INTC", "qty": 198, "price": 48.91, "value": 9684.18}, {"date": "2026-03-16", "side": "buy", "symbol": "WBD", "qty": 368, "price": 27.24, "value": 10024.32}, {"date": "2026-03-16", "side": "buy", "symbol": "WDC", "qty": 26, "price": 288.19, "value": 7492.94}, {"date": "2026-03-16", "side": "buy", "symbol": "LRCX", "qty": 42, "price": 219.79, "value": 9231.12}, {"date": "2026-03-16", "side": "buy", "symbol": "TER", "qty": 25, "price": 298.91, "value": 7472.72}, {"date": "2026-03-16", "side": "buy", "symbol": "MU", "qty": 19, "price": 449.52, "value": 8540.79}, {"date": "2026-03-16", "side": "buy", "symbol": "STX", "qty": 20, "price": 404.95, "value": 8099.05}, {"date": "2026-03-16", "side": "buy", "symbol": "ALB", "qty": 46, "price": 162.68, "value": 7483.41}, {"date": "2026-03-16", "side": "buy", "symbol": "GLW", "qty": 51, "price": 134.75, "value": 6872.39}, {"date": "2026-03-16", "side": "buy", "symbol": "TER", "qty": 25, "price": 297.99, "value": 7449.75}, {"date": "2026-03-16", "side": "buy", "symbol": "STX", "qty": 20, "price": 406.89, "value": 8137.82}, {"date": "2026-03-16", "side": "buy", "symbol": "LRCX", "qty": 42, "price": 219.28, "value": 9209.68}, {"date": "2026-03-16", "side": "buy", "symbol": "NEM", "qty": 90, "price": 109.56, "value": 9860.5}, {"date": "2026-03-16", "side": "buy", "symbol": "WBD", "qty": 368, "price": 27.23, "value": 10018.81}, {"date": "2026-03-16", "side": "buy", "symbol": "INTC", "qty": 198, "price": 48.78, "value": 9658.49}, {"date": "2026-03-16", "side": "buy", "symbol": "WDC", "qty": 26, "price": 288.66, "value": 7505.07}, {"date": "2026-03-16", "side": "buy", "symbol": "GLW", "qty": 51, "price": 134.69, "value": 6868.95}, {"date": "2026-03-16", "side": "buy", "symbol": "MU", "qty": 19, "price": 451.41, "value": 8576.76}, {"date": "2026-03-16", "side": "buy", "symbol": "ALB", "qty": 46, "price": 162.68, "value": 7483.29}], "paper": true};
+
+const fmt$ = n => "$" + n.toLocaleString("en-US", {minimumFractionDigits: 0, maximumFractionDigits: 0});
+const fmt$2 = n => "$" + n.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const fmtPct = (n, dp=1) => (n >= 0 ? "+" : "") + n.toFixed(dp) + "%";
+const el = (tag, cls, text) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+};
+
+/* ---------- Header & tiles ---------- */
+document.getElementById("badge").textContent = DATA.paper ? "Paper trading" : "Live";
+document.getElementById("generated").textContent = DATA.generated;
+document.getElementById("inception").textContent = DATA.inception;
+
+const tiles = document.getElementById("tiles");
+function tile(label, value, delta, deltaUp, hero) {
+  const t = el("div", "tile" + (hero ? " hero" : ""));
+  t.appendChild(el("div", "label", label));
+  t.appendChild(el("div", "value", value));
+  if (delta !== undefined) {
+    const d = el("div", "delta " + (deltaUp ? "up" : "down"),
+                 (deltaUp ? "▲ " : "▼ ") + delta);
+    t.appendChild(d);
+  }
+  tiles.appendChild(t);
+}
+const R = DATA.returns, A = DATA.account;
+tile("Portfolio value", fmt$(A.equity), fmtPct(R.portfolio) + " since inception", R.portfolio >= 0, true);
+tile("Total return", fmtPct(R.portfolio), "S&P 500 " + fmtPct(R.spy), R.portfolio >= 0);
+tile("vs S&P 500", fmtPct(R.excess, 1), "excess return", R.excess >= 0);
+tile("Invested", fmt$(A.invested), A.positions + " open positions", true);
+tile("Cash", fmt$(A.cash), undefined, true);
+
+/* ---------- Line chart ---------- */
+(function chart() {
+  const H = DATA.history, n = H.dates.length;
+  const W = 960, HT = 320, m = {t: 14, r: 96, b: 30, l: 46};
+  const iw = W - m.l - m.r, ih = HT - m.t - m.b;
+  const all = H.portfolio.concat(H.spy);
+  let lo = Math.min(0, ...all), hi = Math.max(0, ...all);
+  const span = hi - lo || 1;
+  lo -= span * 0.06; hi += span * 0.06;
+  const step = [1, 2, 5, 10, 20, 25, 50, 100].find(s => (hi - lo) / s <= 7) || 100;
+  const x = i => m.l + (i / (n - 1)) * iw;
+  const y = v => m.t + (1 - (v - lo) / (hi - lo)) * ih;
+  const svg = document.getElementById("chart");
+  const NS = "http://www.w3.org/2000/svg";
+  const add = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  };
+
+  // Gridlines + y ticks
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
+    add("line", {x1: m.l, x2: W - m.r, y1: y(v), y2: y(v),
+                 stroke: v === 0 ? "var(--border-strong)" : "var(--grid)", "stroke-width": 1});
+    add("text", {x: m.l - 8, y: y(v) + 4, "text-anchor": "end", "font-size": 11,
+                 fill: "var(--text-tertiary)", "font-variant-numeric": "tabular-nums"})
+      .textContent = (v > 0 ? "+" : "") + v + "%";
+  }
+  // X ticks: first trading day of each month
+  let prevMonth = null;
+  H.dates.forEach((d, i) => {
+    const mo = d.slice(0, 7);
+    if (mo !== prevMonth) {
+      prevMonth = mo;
+      if (i > 0 || n < 40) {
+        add("text", {x: x(i), y: HT - 8, "text-anchor": "middle", "font-size": 11,
+                     fill: "var(--text-tertiary)"})
+          .textContent = new Date(d + "T00:00:00").toLocaleString("en-US", {month: "short"});
+      }
+    }
+  });
+
+  const path = arr => arr.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join(" ");
+  add("path", {d: path(H.spy), fill: "none", stroke: "var(--series-bm)",
+               "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round"});
+  add("path", {d: path(H.portfolio), fill: "none", stroke: "var(--series-1)",
+               "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round"});
+
+  // End markers (2px surface ring) + direct end labels, with collision nudge
+  const ends = [
+    {v: H.portfolio[n-1], color: "var(--series-1)", label: "Portfolio " + fmtPct(H.portfolio[n-1])},
+    {v: H.spy[n-1],       color: "var(--series-bm)", label: "S&P 500 " + fmtPct(H.spy[n-1])},
+  ];
+  let y0 = y(ends[0].v), y1 = y(ends[1].v);
+  if (Math.abs(y0 - y1) < 16) {
+    const mid = (y0 + y1) / 2, dir = y0 <= y1 ? 1 : -1;
+    y0 = mid - 8 * dir; y1 = mid + 8 * dir;
+  }
+  ends[0].ly = y0; ends[1].ly = y1;
+  for (const e of ends) {
+    add("circle", {cx: x(n-1), cy: y(e.v), r: 4, fill: e.color,
+                   stroke: "var(--bg-card)", "stroke-width": 2});
+    add("text", {x: x(n-1) + 10, y: e.ly + 4, "font-size": 11, fill: "var(--text-secondary)"})
+      .textContent = e.label;
+  }
+
+  // Crosshair + tooltip (pointer and keyboard)
+  const cross = add("line", {y1: m.t, y2: HT - m.b, stroke: "var(--border-strong)",
+                             "stroke-width": 1, visibility: "hidden"});
+  const dotP = add("circle", {r: 4, fill: "var(--series-1)", stroke: "var(--bg-card)",
+                              "stroke-width": 2, visibility: "hidden"});
+  const dotS = add("circle", {r: 4, fill: "var(--series-bm)", stroke: "var(--bg-card)",
+                              "stroke-width": 2, visibility: "hidden"});
+  const tip = document.getElementById("tooltip");
+  const box = document.getElementById("chartbox");
+
+  function show(i) {
+    const px = x(i);
+    cross.setAttribute("x1", px); cross.setAttribute("x2", px);
+    cross.setAttribute("visibility", "visible");
+    dotP.setAttribute("cx", px); dotP.setAttribute("cy", y(H.portfolio[i]));
+    dotS.setAttribute("cx", px); dotS.setAttribute("cy", y(H.spy[i]));
+    dotP.setAttribute("visibility", "visible");
+    dotS.setAttribute("visibility", "visible");
+
+    tip.replaceChildren();
+    tip.appendChild(el("div", "t-date",
+      new Date(H.dates[i] + "T00:00:00").toLocaleDateString("en-US",
+        {month: "short", day: "numeric", year: "numeric"})));
+    const row = (color, name, val, extra) => {
+      const r = el("div", "t-row");
+      const k = el("span", "t-key"); k.style.borderColor = color; r.appendChild(k);
+      r.appendChild(el("span", "t-val", val));
+      r.appendChild(el("span", "t-name", name + (extra ? " · " + extra : "")));
+      tip.appendChild(r);
+    };
+    row("var(--series-1)", "Portfolio", fmtPct(H.portfolio[i]), fmt$(H.equity[i]));
+    row("var(--series-bm)", "S&P 500", fmtPct(H.spy[i]));
+    tip.style.display = "block";
+    const rect = box.getBoundingClientRect(), sc = rect.width / W;
+    let left = px * sc + 14;
+    if (left + tip.offsetWidth > rect.width - 8) left = px * sc - tip.offsetWidth - 14;
+    tip.style.left = left + "px";
+    tip.style.top = Math.min(y(Math.max(H.portfolio[i], H.spy[i])) * sc, rect.height - tip.offsetHeight - 8) + "px";
+  }
+  function hide() {
+    tip.style.display = "none";
+    for (const e of [cross, dotP, dotS]) e.setAttribute("visibility", "hidden");
+  }
+
+  let focusIdx = n - 1;
+  const overlay = add("rect", {x: m.l, y: m.t, width: iw, height: ih,
+                               fill: "transparent", tabindex: 0});
+  overlay.addEventListener("pointermove", ev => {
+    const rect = svg.getBoundingClientRect();
+    const vx = (ev.clientX - rect.left) * (W / rect.width);
+    focusIdx = Math.max(0, Math.min(n - 1, Math.round((vx - m.l) / iw * (n - 1))));
+    show(focusIdx);
+  });
+  overlay.addEventListener("pointerleave", hide);
+  overlay.addEventListener("focus", () => show(focusIdx));
+  overlay.addEventListener("blur", hide);
+  overlay.addEventListener("keydown", ev => {
+    if (ev.key === "ArrowLeft")  { focusIdx = Math.max(0, focusIdx - 1); show(focusIdx); ev.preventDefault(); }
+    if (ev.key === "ArrowRight") { focusIdx = Math.min(n - 1, focusIdx + 1); show(focusIdx); ev.preventDefault(); }
+    if (ev.key === "Escape") hide();
+  });
+
+  // Table view (accessible alternative to the chart)
+  const ht = document.getElementById("histtable");
+  const thead = el("tr");
+  for (const h of ["Date", "Portfolio", "S&P 500", "Equity"]) thead.appendChild(el("th", null, h));
+  ht.appendChild(thead);
+  for (let i = n - 1; i >= 0; i--) {
+    const tr = el("tr");
+    tr.appendChild(el("td", null, H.dates[i]));
+    tr.appendChild(el("td", null, fmtPct(H.portfolio[i], 2)));
+    tr.appendChild(el("td", null, fmtPct(H.spy[i], 2)));
+    tr.appendChild(el("td", null, fmt$(H.equity[i])));
+    ht.appendChild(tr);
+  }
+})();
+
+/* ---------- Allocation ---------- */
+(function alloc() {
+  const box = document.getElementById("alloc");
+  const rows = DATA.positions.map(p => ({
+    sym: p.symbol, w: p.weight, v: p.value, cash: false,
+    detail: p.qty + " shares × " + fmt$2(p.price),
+  }));
+  rows.push({sym: "Cash", w: DATA.account.cash / DATA.account.equity,
+             v: DATA.account.cash, cash: true, detail: "uninvested"});
+  const maxW = Math.max(...rows.map(r => r.w));
+  for (const r of rows) {
+    const row = el("div", "alloc-row");
+    row.appendChild(el("div", "alloc-sym", r.sym));
+    const track = el("div", "alloc-track");
+    const bar = el("div", "alloc-bar" + (r.cash ? " cash" : ""));
+    bar.style.width = (r.w / maxW * 100) + "%";
+    bar.title = r.sym + ": " + r.detail;
+    track.appendChild(bar);
+    row.appendChild(track);
+    row.appendChild(el("div", "alloc-val", (r.w * 100).toFixed(1) + "% · " + fmt$(r.v)));
+    box.appendChild(row);
+  }
+})();
+
+/* ---------- Holdings ---------- */
+(function holdings() {
+  const t = document.getElementById("holdings");
+  document.getElementById("holdings-sub").textContent =
+    DATA.positions.length + " positions · " + fmt$(DATA.account.invested) + " invested";
+  const head = el("tr");
+  for (const h of ["Symbol", "Shares", "Avg cost", "Price", "Market value", "Weight", "P&L", "P&L %"])
+    head.appendChild(el("th", null, h));
+  t.appendChild(head);
+  for (const p of DATA.positions) {
+    const tr = el("tr");
+    tr.appendChild(el("td", "sym", p.symbol));
+    tr.appendChild(el("td", null, String(p.qty)));
+    tr.appendChild(el("td", null, fmt$2(p.avg_entry)));
+    tr.appendChild(el("td", null, fmt$2(p.price)));
+    tr.appendChild(el("td", null, fmt$(p.value)));
+    tr.appendChild(el("td", null, (p.weight * 100).toFixed(1) + "%"));
+    const up = p.pnl >= 0;
+    tr.appendChild(el("td", up ? "pos" : "neg", (up ? "+" : "−") + fmt$(Math.abs(p.pnl))));
+    tr.appendChild(el("td", up ? "pos" : "neg", fmtPct(p.pnl_pct * 100)));
+    t.appendChild(tr);
+  }
+})();
+
+/* ---------- Trades ---------- */
+(function trades() {
+  const t = document.getElementById("trades");
+  const LIMIT = 25;
+  const shown = DATA.trades.slice(0, LIMIT);
+  document.getElementById("trades-sub").textContent =
+    "Showing " + shown.length + " of " + DATA.trades.length + " filled orders, most recent first";
+  const head = el("tr");
+  for (const h of ["Date", "Side", "Symbol", "Shares", "Fill price", "Value"])
+    head.appendChild(el("th", null, h));
+  t.appendChild(head);
+  for (const o of shown) {
+    const tr = el("tr");
+    tr.appendChild(el("td", null, o.date));
+    tr.appendChild(el("td", o.side === "buy" ? "side-buy" : "side-sell",
+                      o.side === "buy" ? "Buy" : "Sell"));
+    tr.appendChild(el("td", "sym", o.symbol));
+    tr.appendChild(el("td", null, String(o.qty)));
+    tr.appendChild(el("td", null, fmt$2(o.price)));
+    tr.appendChild(el("td", null, fmt$(o.value)));
+    t.appendChild(tr);
+  }
+})();
+</script>
+</body>
+</html>
